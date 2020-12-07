@@ -23,7 +23,7 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 ## Required
 - Linux V3 installed and Wifi connected, see: [Linux for Cosmo](https://support.planetcom.co.uk/index.php/Linux_for_Cosmo)
 - The address IP of your Cosmo (`Taskbar wifi icon` > `your network` > `details`)
-- Ansible installed on your machine
+- Docker installed see: [Get docker](https://docs.docker.com/get-docker/)
 
 ---
 
@@ -58,6 +58,18 @@ When setting `ssh_support: true`, the playbook will scan for file in `roles/cosm
 
 ### VPN
 When setting `vnc_support: true`, the playbook will scan for archive (prefered .tar.gz) in `roles/cosmo-installation/files/vpn` and send them to `/etc/openvpn/client` so you can run then using the injected script like `vpn (start|stop|restart|status) your_conf_name`
+
+If your profile have a structure:
+```
+├── pro-ca.crt
+├── pro-cert.crt
+├── pro-key.key
+├── pro-tls-auth.key
+├── pro.conf
+└── pro.tar.gz
+```
+
+They will be placed in `/etc/openvpn/client/` and you will start with `vpn start pro` (the `.conf` name without the extension)
 
 ### Mobile data
 When setting `mobile_data_support: true`, the playbook will install LTE support, set correct carrier settings and start the service. If you need to change other settings or remove some (eg: your carrier doesn't require a password), you can delete/add settings key. It's dynamic: remove the key `Password`, add an other one, etc.
@@ -104,7 +116,7 @@ Example tree view of a working repo:
 
 ## Usage
 - Edit your settings in `cosmo.yml`
-- Launch the playbook with `ansible-playbook -i cosmo, cosmo.yml`
+- Use the script `./start.sh` to build and launch the playbook within docker
 
 ---
 
