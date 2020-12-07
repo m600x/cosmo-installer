@@ -1,0 +1,12 @@
+.DS_Store
+*.swp
+*.swo
+
+!roles/cosmo-installation/files/ssh/.gitkeep
+roles/cosmo-installation/files/ssh/*
+
+!roles/cosmo-installation/files/vpn/.gitkeep
+roles/cosmo-installation/files/vpn/*
+
+
+

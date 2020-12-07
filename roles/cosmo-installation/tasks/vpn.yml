@@ -6,11 +6,20 @@
     update_cache: yes
   become: true
 
+- name: VPN - Register files to be sent
+  find:
+    paths: "{{ role_path }}/files/vpn"
+    file_type: file
+    hidden: no
+    recurse: Yes
+  register: vpn_files
+  delegate_to: localhost
+
 - name: VPN - Extract VPN conf to /etc/openvpn/client
   unarchive:
-    src: "vpn/{{ item }}"
+    src: "{{ item.path }}"
     dest: /etc/openvpn/client
-  with_items: "{{ vpn_conf }}"
+  with_items: "{{ vpn_files.files | flatten(levels=1) }}"
   become: true
   changed_when: false
 
@@ -25,8 +34,8 @@
   changed_when: false
 
 - name: VPN - Add VPN script
-  copy:
-    src: vpn/script.sh
+  template:
+    src: vpn_script.j2
     dest: "/usr/local/bin/vpn"
     owner: root
     group: root

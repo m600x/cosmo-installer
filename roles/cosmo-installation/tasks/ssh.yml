@@ -9,6 +9,7 @@
   find:
     paths: "{{ role_path }}/files/ssh"
     file_type: file
+    hidden: no
     recurse: Yes
   register: ssh_files
   delegate_to: localhost

@@ -12,13 +12,8 @@
         cosmo_keyboard_layout: 'gb'
         locale: 'en_US'
         tz: 'Europe/Paris'
-        # VNC support
-        vnc_support: false
-        vnc_password: '__MUST_CHANGE__'
-        vnc_port: 5900
-        # VPN support
-        vpn_support: false
-        vpn_conf: []
+        # SSH support
+        ssh_support: false
         # LTE support
         mobile_data_support: true
         mobile_data_roaming: false
@@ -27,6 +22,12 @@
           Username: orange
           Password: orange
           AuthenticationMethod: pap
+        # VPN support
+        vpn_support: false
+        # VNC support
+        vnc_support: false
+        vnc_password: '__MUST_CHANGE__'
+        vnc_port: 5900
 
 - name: Check which user to be for SSH
   hosts: all
