@@ -7,12 +7,13 @@ system_packages:
   - zsh
   - locales
   - unzip
-  - dnsutils          # nslookup
-  - usbutils          # lsusb
-  - pciutils          # lspci
-  - psmisc            # killall
-  - build-essential   # evdev right click - gcc
-  - libevdev-dev      # evdev right click - libevdev
+  - dnsutils                   # nslookup
+  - usbutils                   # lsusb
+  - pciutils                   # lspci
+  - psmisc                     # killall
+  - build-essential            # evdev right click - gcc
+  - libevdev-dev               # evdev right click - libevdev
+  - xserver-xorg-input-mtrack  # relative touchscreen for accuracy
 vnc_packages:
   - tigervnc-scraping-server
 vpn_packages:
@@ -39,3 +40,5 @@ rights:
 new_hostname: cosmopda
 
 vnc_port: 5900
+
+relative_touchscreen: false

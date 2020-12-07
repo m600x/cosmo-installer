@@ -146,7 +146,20 @@
         state: present
       become: true
 
-- name: CORE = Right click
+- name: CORE - Replace evdev driver with mtrack for relative touchscreen movement
+  copy:
+    src: "{{ item }}"
+    dest: "/usr/share/X11/xorg.conf.d/{{ item | basename }}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: '0644'
+  with_items:
+    - "common/10-evdev.conf"
+    - "common/50-mtrack.conf"
+  become: true
+  when: relative_touchscreen
+
+- name: CORE - Right click
   block:
     - name: Get cosmo-rightclick
       git:

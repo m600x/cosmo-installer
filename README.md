@@ -14,6 +14,7 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 - Set the keyboard layout, hostname and timezone
 - Create a mounting point for the microSD card
 - Add right click on long press (**You must manually reboot to see the effect**)
+- *Optional:* Touchscreen as touchpad (relative positioning)
 - *Optional:* Set back your SSH settings
 - *Optional:* Add VNC server
 - *Optional:* Add all your OpenVPN profile
@@ -40,6 +41,7 @@ new_root_password:          <--- New root pass            (string)  eg: 'myrootp
 cosmo_keyboard_layout:      <--- Your cosmo layout        (string)  eg: 'gb'
 locale:                     <--- Your locale              (string)  eg: 'en_US'
 tz:                         <--- Your timezone            (string)  eg: 'Europe/Paris'
+relative_touchscreen:       <--- Relative position        (boolean) eg: true
 ssh_support:                <--- If SSH file must be sent (boolean) eg: false
 mobile_data_support:        <-- Install upport for LTE    (boolean) eg: true
 mobile_data_roaming:        <--- Allow roaming            (boolean) eg: false
