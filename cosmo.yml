@@ -12,8 +12,8 @@
         cosmo_keyboard_layout: 'gb'
         locale: 'en_US'
         tz: 'Europe/Paris'
-        touch_rightclick: true
-        relative_touchscreen: true
+        touch_relatve: true
+        touch_rightclick: false
         # SSH support
         ssh_support: false
         # LTE support

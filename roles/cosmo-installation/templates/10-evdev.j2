@@ -32,10 +32,11 @@ Section "InputClass"
         Driver "evdev"
 EndSection
 
-# This section is the default evdev shipped with Linux V3 on the Cosmo
-#Section "InputClass"
-#        Identifier "evdev touchscreen catchall"
-#        MatchIsTouchscreen "on"
-#        MatchDevicePath "/dev/input/event*"
-#        Driver "evdev"
-#EndSection
+{% if touch_rightclick == true %}
+Section "InputClass"
+        Identifier "evdev touchscreen catchall"
+        MatchIsTouchscreen "on"
+        MatchDevicePath "/dev/input/event*"
+        Driver "evdev"
+EndSection
+{% endif %}

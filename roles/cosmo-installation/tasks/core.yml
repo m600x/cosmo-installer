@@ -146,32 +146,41 @@
         state: present
       become: true
 
-- name: CORE - Replace evdev driver with mtrack for relative touchscreen movement
-  copy:
-    src: "{{ item }}"
-    dest: "/usr/share/X11/xorg.conf.d/{{ item | basename }}"
-    owner: "{{ ansible_ssh_user }}"
-    group: "{{ ansible_ssh_user }}"
-    mode: '0644'
-  with_items:
-    - "common/10-evdev.conf"
-    - "common/50-mtrack.conf"
-  become: true
-  when: touch_relative
-
-- name: CORE - Right click
+- name: CORE - Touchscreen xorg mtrack (relative positioning)
   block:
-    - name: Get cosmo-rightclick
+    - name: CORE - Touchscreen xorg mtrack - Add conf file
+      copy:
+        src: "common/50-mtrack.conf"
+        dest: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
+        owner: "root"
+        group: "root"
+        mode: '0644'
+      become: true
+      when: touch_relative is true
+      notify: Restart display-manager
+    - name: CORE - Touchscreen xorg mtrack - Disable and stop cosmo-rightclick service
+      systemd:
+        name: rightclick
+        enabled: no
+        state: stopped
+      become: true
+      notify: Restart display-manager
+      ignore_errors: true
+  when: touch_relative is true
+
+- name: CORE - Touchscreen xorg evdev (absolute positioning)
+  block:
+    - name: CORE - Touchscreen xorg evdev - Get cosmo-rightclick
       git:
         repo: https://github.com/m600x/cosmo-rightclick.git
         dest: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
         clone: yes
         update: yes
-    - name: Build cosmo-rightclick
+    - name: CORE - Touchscreen xorg evdev - Build cosmo-rightclick
       make:
         chdir: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
         target: all
-    - name: Move binary to /usr/local/bin/cosmo-rightclick
+    - name: CORE - Touchscreen xorg evdev - Move binary to /usr/local/bin/cosmo-rightclick
       copy:
         src: "/home/{{ ansible_ssh_user }}/cosmo-rightclick/out/cosmo-rightclick"
         dest: "/usr/local/bin/cosmo-rightclick"
@@ -180,7 +189,7 @@
         mode: '0755'
         remote_src: yes
       become: true
-    - name: Add cosmo-rightclick service
+    - name: CORE - Touchscreen xorg evdev - Add cosmo-rightclick service
       template:
         src: rightclick_service.j2
         dest: "/etc/systemd/system/rightclick.service"
@@ -188,9 +197,45 @@
         group: root
         mode: '0755'
       become: true
-    - name: Enable and start cosmo-rightclick service
+      notify: Restart display-manager
+    - name: CORE - Touchscreen xorg evdev - Enable and start cosmo-rightclick service
       systemd:
         name: rightclick
         enabled: yes
       become: true
-  when: touch_rightclick
+      notify: Restart display-manager
+    - name: CORE - Touchscreen xorg evdev - Ensure mtrack conf is absent
+      file:
+        path: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
+        state: absent
+      become: true
+      notify: Restart display-manager
+  when: touch_rightclick is true and touch_relative is false
+
+- name: CORE - Touchscreen xorg evdev default
+  block:
+    - name: CORE - Touchscreen xorg default - Disable and stop cosmo-rightclick service
+      systemd:
+        name: rightclick
+        enabled: no
+        state: stopped
+      become: true
+      notify: Restart display-manager
+      ignore_errors: true
+    - name: CORE - Touchscreen xorg default - Ensure mtrack conf is absent
+      file:
+        path: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
+        state: absent
+      become: true
+      notify: Restart display-manager
+  when: touch_rightclick is false and touch_relative is false
+
+- name: CORE - Touchscreen xorg mtrack and evdev conf template
+  template:
+    src: 10-evdev.j2
+    dest: "/usr/share/X11/xorg.conf.d/10-evdev.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Restart display-manager

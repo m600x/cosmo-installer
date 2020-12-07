@@ -1,6 +1,6 @@
 ## Planet Computers Cosmo communicator - Installation playbook
 ---
-*This is still for advanced user since it's not fully documented and bulletproof. Use with caution.*
+*/!\ This is still for advanced user. Use with caution.*
 
 ## Description
 Sick and tired of always have to reinstall the whole Linux side of my **Planet Computers Cosmo communicator** everytime I break it, which happened a few time already... Since I'm an SRE, automate the reinstallation process was obvious...
@@ -13,8 +13,8 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 - Change `root` password
 - Set the keyboard layout, hostname and timezone
 - Create a mounting point for the microSD card
-- *Optional:* Add right click on long press (**You must manually reboot to see the effect**)
-- *Optional:* Touchscreen as touchpad (relative positioning)
+- *Optional:* Add right click on long press [using stock driver]
+- *Optional:* Touchscreen as touchpad (relative positioning) [using mtrack driver which support right click]
 - *Optional:* Set back your SSH settings
 - *Optional:* Add VNC server
 - *Optional:* Add all your OpenVPN profile
@@ -41,8 +41,8 @@ new_root_password:          <--- New root pass            (string)  eg: 'myrootp
 cosmo_keyboard_layout:      <--- Your cosmo layout        (string)  eg: 'gb'
 locale:                     <--- Your locale              (string)  eg: 'en_US'
 tz:                         <--- Your timezone            (string)  eg: 'Europe/Paris'
-touch_rightclick:           <--- Rightclick on long press (boolean) eg: true
 touch_relative:             <--- Relative position        (boolean) eg: true
+touch_rightclick:           <--- Rightclick on long press (boolean) eg: false
 ssh_support:                <--- If SSH file must be sent (boolean) eg: false
 mobile_data_support:        <-- Install upport for LTE    (boolean) eg: true
 mobile_data_roaming:        <--- Allow roaming            (boolean) eg: false
@@ -116,6 +116,21 @@ Example tree view of a working repo:
             └── zshrc.j2
 ```
 
+### Touchscreen
+There's two options you can use:
+- `touch_rightclick`: Support for long press to trigger a right click if you want to keep the default driver with absolute positioning (you click exactly where you want).
+- `touch_relative`: Use `mtrack` driver to change the Touchscreen behavior as a Touchpad with relative positioning (you drag your finder across the screen to where you want).
+
+**Note:** If you set both options to `true`, only **touch_relative** will be installed
+
+#### Mtrack settings
+- `Sensitivity 1.2`: Increase speed
+- `ScrollDistance 30`: Increase scrolling speed
+- `ScrollUpButton and ScrollDownButton`: Correct the scrolling direction
+
+Right click with two fingers tap.
+Scroll with two fingers
+
 ---
 
 ## Usage
@@ -125,7 +140,7 @@ Example tree view of a working repo:
 ---
 
 ## Steps description
-- Core (21 tasks)
+- Core (32 tasks)
   - Update installed packages
   - Install basic packages
   - Change hostname
@@ -141,6 +156,15 @@ Example tree view of a working repo:
   - Symlink it to `~/sdcard`
   - Get mSD UUID and filesystem
   - Create entry in fstab for automount
+  - If `touch_relative`
+    - Add mtrack conf file
+  - If `touch_rightclick`
+    - Download repo, make binary
+    - Add as a service
+  - If none
+    - Ensure service rightclick is absent
+    - Ensure mtrack conf is absent
+  - Add xorg conf
 - Custom (2 tasks)
   - Install oh-my-zsh
   - Add custom .zshrc
