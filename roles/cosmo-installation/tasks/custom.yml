@@ -11,3 +11,12 @@
     owner: "{{ ansible_ssh_user }}"
     group: "{{ ansible_ssh_user }}"
     mode: '0644'
+
+- name: CUSTOM - Add .vimrc
+  copy:
+    src: "common/vimrc"
+    dest: "/home/{{ ansible_ssh_user }}/.vimrc"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: '0644'
+  become: true

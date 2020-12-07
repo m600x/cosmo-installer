@@ -139,7 +139,7 @@ Scroll with two fingers
 
 ---
 
-## Steps description
+## Steps description (60 tasks total)
 - Core (32 tasks)
   - Update installed packages
   - Install basic packages
@@ -165,25 +165,26 @@ Scroll with two fingers
     - Ensure service rightclick is absent
     - Ensure mtrack conf is absent
   - Add xorg conf
-- Custom (2 tasks)
+- Custom (3 tasks)
   - Install oh-my-zsh
   - Add custom .zshrc
-- SSH (4 tasks) [*optional*]
+  - Add custom .vimrc
+- [*optional*] SSH (4 tasks)
   - Add all SSH files contained in files/ssh
   - Fix rights for theses files
-- Mobile data (6 tasks) [*optional*]
+- [*optional*] Mobile data (6 tasks)
   - Install connman, cmst along with other for LTE support
   - Enable connman wifi connectivity
   - Enable roaming (*optional*)
   - Add carrier settings
   - Enable LTE
-- VPN (4 tasks) [*optional*]
+- [*optional*] VPN (5 tasks)
   - Install OpenVPN
   - Add all VPN profile contained in files/vpn
   - Add vpn startup script
-- VNC (8 tasks) [*optional*]
+- [*optional*] VNC (8 tasks)
   - Install VNC packages
   - Create password
   - Add autostart of the server
-- Specific (3 tasks)
+- Specific (2 tasks)
   - Download and install vault cli

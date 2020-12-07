@@ -7,6 +7,9 @@ system_packages:
   - zsh
   - locales
   - unzip
+  - tree
+  - vim-gui-common
+  - vim-runtime
   - dnsutils                   # nslookup
   - usbutils                   # lsusb
   - pciutils                   # lspci
