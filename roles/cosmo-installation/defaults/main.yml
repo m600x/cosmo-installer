@@ -41,4 +41,5 @@ new_hostname: cosmopda
 
 vnc_port: 5900
 
-relative_touchscreen: false
+relative_touchscreen: true
+touch_rightclick: true

@@ -157,7 +157,7 @@
     - "common/10-evdev.conf"
     - "common/50-mtrack.conf"
   become: true
-  when: relative_touchscreen
+  when: touch_relative
 
 - name: CORE - Right click
   block:
@@ -193,3 +193,4 @@
         name: rightclick
         enabled: yes
       become: true
+  when: touch_rightclick

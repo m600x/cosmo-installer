@@ -12,6 +12,7 @@
         cosmo_keyboard_layout: 'gb'
         locale: 'en_US'
         tz: 'Europe/Paris'
+        touch_rightclick: true
         relative_touchscreen: true
         # SSH support
         ssh_support: false
