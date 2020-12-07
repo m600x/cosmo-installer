@@ -1,0 +1,8 @@
+[Service]
+Type=oneshot
+RemainAfterExit=true
+StandardOutput=journal
+ExecStart=/usr/local/bin/cosmo-rightclick
+
+[Install]
+WantedBy=default.target

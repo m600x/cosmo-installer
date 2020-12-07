@@ -145,3 +145,38 @@
         opts: user,fmask=0111,dmask=0000
         state: present
       become: true
+
+- name: CORE = Right click
+  block:
+    - name: Get cosmo-rightclick
+      git:
+        repo: https://github.com/m600x/cosmo-rightclick.git
+        dest: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
+        clone: yes
+        update: yes
+    - name: Build cosmo-rightclick
+      make:
+        chdir: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
+        target: all
+    - name: Move binary to /usr/local/bin/cosmo-rightclick
+      copy:
+        src: "/home/{{ ansible_ssh_user }}/cosmo-rightclick/out/cosmo-rightclick"
+        dest: "/usr/local/bin/cosmo-rightclick"
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: yes
+      become: true
+    - name: Add cosmo-rightclick service
+      template:
+        src: rightclick_service.j2
+        dest: "/etc/systemd/system/rightclick.service"
+        owner: root
+        group: root
+        mode: '0755'
+      become: true
+    - name: Enable and start cosmo-rightclick service
+      systemd:
+        name: rightclick
+        enabled: yes
+      become: true

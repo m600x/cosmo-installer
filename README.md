@@ -13,6 +13,7 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 - Change `root` password
 - Set the keyboard layout, hostname and timezone
 - Create a mounting point for the microSD card
+- Add right click on long press (**You must manually reboot to see the effect**)
 - *Optional:* Set back your SSH settings
 - *Optional:* Add VNC server
 - *Optional:* Add all your OpenVPN profile
