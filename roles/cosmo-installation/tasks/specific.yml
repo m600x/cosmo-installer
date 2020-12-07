@@ -1,0 +1,13 @@
+---
+- name: SPECIFIC - Check if vault cli is already installed
+  stat:
+    path: /usr/local/bin/vault
+  register: vault_installed
+
+- name: SPECIFIC - Download and install Vault CLI
+  unarchive:
+    src: https://releases.hashicorp.com/vault/1.6.0/vault_1.6.0_linux_arm64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+  become: true
+  when: not vault_installed.stat.exists

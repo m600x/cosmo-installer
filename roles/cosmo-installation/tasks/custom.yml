@@ -1,0 +1,13 @@
+---
+- name: CUSTOM - Install Oh-My-ZSH
+  shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  ignore_errors: true
+  changed_when: false
+
+- name: CUSTOM - Add .zshrc template
+  template:
+    src: zshrc.j2
+    dest: "/home/{{ ansible_ssh_user }}/.zshrc"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: '0644'

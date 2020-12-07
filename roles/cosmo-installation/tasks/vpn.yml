@@ -1,0 +1,34 @@
+---
+- name: VPN - Install VPN packages
+  apt:
+    name: "{{ vpn_packages }}"
+    state: present
+    update_cache: yes
+  become: true
+
+- name: VPN - Extract VPN conf to /etc/openvpn/client
+  unarchive:
+    src: "vpn/{{ item }}"
+    dest: /etc/openvpn/client
+  with_items: "{{ vpn_conf }}"
+  become: true
+  changed_when: false
+
+- name: VPN - Change chown of conf files
+  file:
+    path: /etc/openvpn/client
+    owner: root
+    group: root
+    mode: '0755'
+    recurse: yes
+  become: true
+  changed_when: false
+
+- name: VPN - Add VPN script
+  copy:
+    src: vpn/script.sh
+    dest: "/usr/local/bin/vpn"
+    owner: root
+    group: root
+    mode: '0755'
+  become: true

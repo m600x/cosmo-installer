@@ -1,0 +1,42 @@
+---
+system_packages:
+  - git
+  - curl
+  - wget
+  - htop
+  - zsh
+  - locales
+  - unzip
+  - dnsutils          # nslookup
+  - usbutils          # lsusb
+  - pciutils          # lspci
+  - psmisc            # killall
+  - build-essential   # evdev right click - gcc
+  - libevdev-dev      # evdev right click - libevdev
+  - evtest
+vnc_packages:
+  - tigervnc-scraping-server
+vpn_packages:
+  - openvpn
+  - resolvconf
+mobile_packages:
+  - connman
+  - cmst
+  - mobile-broadband-provider-info
+  - ofono-scripts
+
+rights:
+  id_rsa:
+    rights: '0600'
+  id_rsa.pub:
+    rights: '0644'
+  config:
+    rights: '0644'
+  known_hosts:
+    rights: '0600'
+  authorized_keys:
+    rights: '0644'
+
+new_hostname: cosmopda
+
+vnc_port: 5900

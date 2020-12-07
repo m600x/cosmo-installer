@@ -1,0 +1,17 @@
+---
+- include_tasks: core.yml
+
+- include_tasks: vnc.yml
+  when: vnc_support
+
+- include_tasks: ssh.yml
+
+- include_tasks: custom.yml
+
+- include_tasks: vpn.yml
+  when: vpn_support
+
+- include_tasks: mobile.yml
+  when: mobile_data_support
+
+- include_tasks: specific.yml

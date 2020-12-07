@@ -1,0 +1,29 @@
+---
+- name: MOBILE - Install mobile data packages
+  apt:
+    name: "{{ mobile_packages }}"
+    state: present
+    update_cache: yes
+  become: True
+
+- name: MOBILE - Connman Enable Wifi support
+  command: connmanctl enable wifi
+  changed_when: false
+
+- name: MOBILE - Enable roaming
+  command: /usr/share/ofono/scripts/set-roaming-allowed
+  when: mobile_data_roaming
+
+- name: MOBILE - Ensure LTE is deactivate before changing settings
+  command: /usr/share/ofono/scripts/deactivate-context 1
+  changed_when: false
+
+- name: MOBILE - Add carrier settings
+  command: "/usr/share/ofono/scripts/set-context-property 0 {{ item.key }} {{ item.value }}"
+  with_dict: "{{ mobile_data_settings }}"
+  ignore_errors: true
+  changed_when: false
+
+- name: MOBILE - Activate LTE
+  command: /usr/share/ofono/scripts/activate-context 1
+  changed_when: false
