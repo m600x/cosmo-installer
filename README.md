@@ -97,6 +97,27 @@ They will be placed in `/etc/openvpn/client/` and you will start with `vpn start
 ### Mobile data
 When setting `mobile_data_support: true`, the playbook will install LTE support, set correct carrier settings and start the service. If you need to change other settings or remove some (eg: your carrier doesn't require a password), you can delete/add settings key. It's dynamic: remove the key `Password`, add an other one, etc.
 
+### Touchscreen
+There's two options you can use:
+- `touch_rightclick`: Support for long press to trigger a right click if you want to keep the default driver with absolute positioning (you click exactly where you want).
+- `touch_relative`: Use `mtrack` driver to change the Touchscreen behavior as a Touchpad with relative positioning (you drag your finder across the screen to where you want).
+
+**Note:** If you set both options to `true`, only **touch_relative** will be installed
+
+#### Mtrack settings
+- `Sensitivity 1.2`: Increase speed
+- `ScrollDistance 30`: Increase scrolling speed
+- `ScrollUpButton and ScrollDownButton`: Correct the scrolling direction
+
+Right click with two fingers tap.
+Scroll with two fingers
+
+---
+
+## Usage
+- Edit your settings in `cosmo.yml`
+- Use the script `./start.sh` to build and launch the playbook within docker
+
 Example tree view of a working repo:
 ```
 .
@@ -134,27 +155,6 @@ Example tree view of a working repo:
             ├── vpn_script.j2
             └── zshrc.j2
 ```
-
-### Touchscreen
-There's two options you can use:
-- `touch_rightclick`: Support for long press to trigger a right click if you want to keep the default driver with absolute positioning (you click exactly where you want).
-- `touch_relative`: Use `mtrack` driver to change the Touchscreen behavior as a Touchpad with relative positioning (you drag your finder across the screen to where you want).
-
-**Note:** If you set both options to `true`, only **touch_relative** will be installed
-
-#### Mtrack settings
-- `Sensitivity 1.2`: Increase speed
-- `ScrollDistance 30`: Increase scrolling speed
-- `ScrollUpButton and ScrollDownButton`: Correct the scrolling direction
-
-Right click with two fingers tap.
-Scroll with two fingers
-
----
-
-## Usage
-- Edit your settings in `cosmo.yml`
-- Use the script `./start.sh` to build and launch the playbook within docker
 
 ---
 
