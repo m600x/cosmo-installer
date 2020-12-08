@@ -2,8 +2,9 @@
 - name: CORE - Update installed packages
   apt:
     update_cache: yes
-    upgrade: full
+    upgrade: safe
   become: true
+  ignore_errors: yes
 
 - name: CORE - Install basic packages
   apt:
@@ -239,3 +240,37 @@
     mode: '0644'
   become: true
   notify: Restart display-manager
+
+- name: CORE - Keyboard
+  block:
+    - name: CORE - Keyboard - Add general hotkey binding
+      lineinfile:
+        path: "/home/{{ ansible_ssh_user }}/.config/kglobalshortcutsrc"
+        regexp: "^{{ item.split('=').0 }}"
+        line: "{{ item }}"
+        state: present
+      with_items: "{{ kde_shortcuts }}"
+      notify: Restart display-manager
+    - name: CORE - Keyboard - Add kb-backlight script control
+      copy:
+        src: common/kb-backlight.sh
+        dest: "/usr/local/bin/kb-backlight"
+        owner: root
+        group: root
+        mode: '0755'
+      become: true
+    - name: CORE - Keyboard - Add backlight hotkey binding
+      lineinfile:
+        path: "/home/{{ ansible_ssh_user }}/.config/kglobalshortcutsrc"
+        line: "{{ item }}"
+        insertafter: '^\[khotkeys\]'
+        state: present
+      with_items: "{{ kb_backlight_shortcuts }}"
+
+      notify: Restart display-manager
+    - name: CORE - Keyboard - Add backlight hotkey definition
+      blockinfile:
+        path: "/home/{{ ansible_ssh_user }}/.config/khotkeysrc"
+        insertbefore: "[Gestures]"
+        block: "{{ lookup('file', '../files/common/khotkey') }}"
+      notify: Restart display-manager

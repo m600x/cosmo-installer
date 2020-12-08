@@ -59,3 +59,17 @@ mobile_data_roaming: false
 vpn_support: false
 vnc_support: false
 run_specific: false
+
+kde_shortcuts:
+  - Increase Screen Brightness=Alt+N,Monitor Brightness Up,Increase Screen Brightness
+  - Decrease Screen Brightness=Alt+B,Monitor Brightness Down,Decrease Screen Brightness
+  - mic_mute=Alt+T,Microphone Mute,Mute Microphone
+  - mute=Alt+Y,Volume Mute,Mute
+  - Window Quick Tile Left=Ctrl+Shift+Left,Meta+Left,Quick Tile Window to the Left
+  - Window Quick Tile Right=Ctrl+Shift+Right,Meta+Right,Quick Tile Window to the Right
+  - Window Maximize=Ctrl+Shift+Up,Meta+PgUp,Maximize Window
+  - Window Minimize=Ctrl+Shift+Down,Meta+PgDown,Minimize Window
+
+kb_backlight_shortcuts:
+  - "{d18c4e6c-6841-439a-8fcc-de9b039d82b3}=Alt+Shift+N,none,Keyboard backlight up"
+  - "{5ee66685-b8e5-47ed-9ced-83377779d01b}=Alt+Shift+B,none,Keyboard backlight down"

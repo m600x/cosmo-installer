@@ -13,6 +13,8 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 - Change `root` password
 - Set the keyboard layout, hostname and timezone
 - Create a mounting point for the microSD card
+- Readd keyboard hotkey (LCD brightness, mute, split screen...)
+- Add keyboard backlight control
 - *Optional:* Add right click on long press [using stock driver]
 - *Optional:* Touchscreen as touchpad (relative positioning) [using mtrack driver which support right click]
 - *Optional:* Set back your SSH settings
@@ -20,6 +22,21 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 - *Optional:* Add all your OpenVPN profile
 - *Optional:* Add support for LTE connexion
 - *Optional:* Specific task where you add whatever you might need
+
+### Notes
+The keyboard hotkey (typically Fn+Something) does not use the stock meta key `Fn` but `Alt`. So to increase the LCD brightness you would use `Alt+N` instead of `Fn+N`.
+
+List of currently supported hotkey:
+- LCD brightness up: `Alt + N`
+- LCD brightness down: `Alt + B`
+- Keyboard backlight up: `Alt + Shift + N`
+- Keyboard backlight down: `Alt + Shift + B`
+- Mute mic: `Alt + T`
+- Mute: `Alt + Y`
+- Move window to left: `Ctrl + Shift + Left`
+- Move window to right: `Ctrl + Shift + Right`
+- Maximize window: `Ctrl + Shift + Up`
+- Minimize window: `Ctrl + Shift + Down`
 
 ---
 
@@ -167,6 +184,9 @@ Scroll with two fingers
     - Ensure service rightclick is absent
     - Ensure mtrack conf is absent
   - Add xorg conf
+  - Add general keyboard hotkey (LCD brightness, split screen, etc)
+  - Add keyboard backlight script
+  - Add keyboard backlight hotkey (5 levels)
 - Custom (3 tasks)
   - Install oh-my-zsh
   - Add custom .zshrc
