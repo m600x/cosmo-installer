@@ -19,6 +19,7 @@ The idea is that you just need to reinstall the Gemian OS (V3 currently), connec
 - *Optional:* Add VNC server
 - *Optional:* Add all your OpenVPN profile
 - *Optional:* Add support for LTE connexion
+- *Optional:* Specific task where you add whatever you might need
 
 ---
 
@@ -55,6 +56,7 @@ vpn_support:                <--- If VPN file must be sent (boolean) eg: false
 vnc_support:                <--- Install VNC server       (boolean) eg: false
 vnc_password:               <--- VNC password             (string)  eg: 'myvncpassword'
 vnc_port:                   <--- VNC port                 (string)  eg: '5900'
+run_specific                <--- Run specific.yml         (boolean) eg: false
 ```
 
 ### SSH
@@ -139,7 +141,7 @@ Scroll with two fingers
 
 ---
 
-## Steps description (60 tasks total)
+## Steps description (63 tasks total)
 - Core (32 tasks)
   - Update installed packages
   - Install basic packages
@@ -186,5 +188,6 @@ Scroll with two fingers
   - Install VNC packages
   - Create password
   - Add autostart of the server
-- Specific (2 tasks)
-  - Download and install vault cli
+- [*optional*] Specific (5 tasks) <-- Given as example, put your own tasks here
+  - Install Vault CLI
+  - Install Ansible

@@ -7,9 +7,15 @@ system_packages:
   - zsh
   - locales
   - unzip
-  - tree
-  - vim-gui-common
-  - vim-runtime
+  - telnet
+  - iftop
+  - netcat
+  - automake
+  - autoconf
+  - tree                       # folder tree view
+  - pwgen                      # password generator
+  - vim-gui-common             # vim syntax
+  - vim-runtime                # vim syntax
   - dnsutils                   # nslookup
   - usbutils                   # lsusb
   - pciutils                   # lspci
@@ -45,4 +51,11 @@ new_hostname: cosmopda
 vnc_port: 5900
 
 touch_relative: true
-touch_rightclick: true
+touch_rightclick: false
+
+ssh_support: false
+mobile_data_support: false
+mobile_data_roaming: false
+vpn_support: false
+vnc_support: false
+run_specific: false

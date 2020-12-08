@@ -16,3 +16,4 @@
   when: vnc_support
 
 - include_tasks: specific.yml
+  when: run_specific

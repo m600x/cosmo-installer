@@ -30,6 +30,7 @@
         vnc_support: false
         vnc_password: '__MUST_CHANGE__'
         vnc_port: 5900
+        run_specific: false
 
 - name: Check which user to be for SSH
   hosts: all
