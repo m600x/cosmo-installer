@@ -1,7 +1,7 @@
 ---
-- name: VNC - Install basic packages
+- name: VNC - Install VNC packages
   apt:
-    name: "{{ system_packages }}"
+    name: "{{ vnc_packages }}"
     state: present
   become: true
 

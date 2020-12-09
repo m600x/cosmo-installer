@@ -4,7 +4,7 @@
     name: "{{ mobile_packages }}"
     state: present
     update_cache: yes
-  become: True
+  become: true
 
 - name: MOBILE - Connman Enable Wifi support
   command: connmanctl enable wifi

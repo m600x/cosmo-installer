@@ -12,8 +12,16 @@
         cosmo_keyboard_layout: 'gb'
         locale: 'en_US'
         tz: 'Europe/Paris'
-        touch_relatve: true
+        touch_relative: true
         touch_rightclick: false
+        # Wifi section
+        wifi_networks:
+          NameOfYourWifi:
+            protocole: wpa-psk
+            psk: yourpassphrase
+          NameOfYourSecondWifi:
+            protocole: wpa-psk
+            psk: yourpassphrase
         # SSH support
         ssh_support: false
         # LTE support
@@ -68,10 +76,6 @@
       set_fact:
         ansible_sudo_pass: "{{ new_root_password }}"
       when: root_test.failed
-    - set_fact:
-        ansible_ssh_user: "{{ new_user_name }}"
-        ansible_ssh_pass: "{{ new_user_pass }}"
-        ansible_sudo_pass: "{{ new_root_password }}"
 
 - name: Cosmo installation
   hosts: all

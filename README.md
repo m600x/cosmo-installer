@@ -5,12 +5,13 @@
 ## Description
 Sick and tired of always have to reinstall the whole Linux side of my **Planet Computers Cosmo communicator** everytime I break it, which happened a few time already... Since I'm an SRE, automate the reinstallation process was obvious...
 
-The idea is that you just need to reinstall the Gemian OS (V3 currently), connect to your wifi and launch the playbook to have it set back to your liking.
+The idea is that you just need to reinstall the Gemian OS (V3 currently), connect to your wifi and launch the playbook to have it set back to your liking. Runtime of the playbook is around 5 minutes on my tests. The same things by hand would take me at least an hour...
 
 ### What it will do in short:
 - Install bunch of crap (git, curl, htop, zsh, etc...)
 - Remove `cosmo` user and add yours
 - Change `root` password
+- Add all your wifi network
 - Set the keyboard layout, hostname and timezone
 - Create a mounting point for the microSD card
 - Readd keyboard hotkey (LCD brightness, mute, split screen...)
@@ -61,6 +62,13 @@ locale:                     <--- Your locale              (string)  eg: 'en_US'
 tz:                         <--- Your timezone            (string)  eg: 'Europe/Paris'
 touch_relative:             <--- Relative position        (boolean) eg: true
 touch_rightclick:           <--- Rightclick on long press (boolean) eg: false
+wifi_networks:
+  YouWifiNameA:             <--- SSID of your first wifi  (string)  eg: 'YouWifiNameA'
+    protocole: wpa-psk      <--- Security of the network  (string)  eg: 'wpa-psk'
+    psk:                    <--- Passphrase               (string)  eg: 'mypassphrase'
+  YouWifiNameB:             <--- SSID of your second wifi (string)  eg: 'YouWifiNameB'
+    protocole: wpa-psk      <--- Security of the network  (string)  eg: 'wpa-psk'
+    psk:                    <--- Passphrase               (string)  eg: 'mysubpassphrase'
 ssh_support:                <--- If SSH file must be sent (boolean) eg: false
 mobile_data_support:        <-- Install upport for LTE    (boolean) eg: true
 mobile_data_roaming:        <--- Allow roaming            (boolean) eg: false
@@ -75,6 +83,13 @@ vnc_password:               <--- VNC password             (string)  eg: 'myvncpa
 vnc_port:                   <--- VNC port                 (string)  eg: '5900'
 run_specific                <--- Run specific.yml         (boolean) eg: false
 ```
+
+### WIFI
+The playbook will add any number of wifi connection defined, just add/remove your network as needed.
+
+From: http://transit.iut2.upmf-grenoble.fr/cgi-bin/man/man2html?5+nm-settings
+
+You can customize the network definition template located at `roles/cosmo-installation/templates/wifi.j2`
 
 ### SSH
 When setting `ssh_support: true`, the playbook will scan for file in `roles/cosmo-installation/files/ssh` and send them to `/home/user/.ssh` with correct right for common file
@@ -158,18 +173,19 @@ Example tree view of a working repo:
 
 ---
 
-## Steps description (63 tasks total)
-- Core (32 tasks)
+## Steps description (68 tasks total)
+- Core (14 tasks)
   - Update installed packages
   - Install basic packages
   - Change hostname
   - Set timezone
   - Generate locale
   - Change root password
+  - Add wifi networks
   - Add new user
-  - Allow sudo passwprdless sudo
-  - Allow new user to use NetworkManager settings
+  - Allow passwordless sudo
   - Delete default user cosmo
+- Cosmo (23 tasks)
   - Fix keyboard layout
   - Create mount point for mSD to `/media/sdcard`
   - Symlink it to `~/sdcard`

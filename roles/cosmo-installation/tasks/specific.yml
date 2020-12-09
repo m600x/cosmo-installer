@@ -15,15 +15,18 @@
 
 - name: Ansible
   block:
-    - name: Ansible - Add ansible repo
-      apt_repository:
-        repo: deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
-        state: present
     - name: Ansible - Add ansible repo key
       apt_key:
         keyserver: keyserver.ubuntu.com
         id: 93C4A3FD7BB9C367
+      become: true
+    - name: Ansible - Add ansible repo
+      apt_repository:
+        repo: deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
+        state: present
+      become: true
     - name: Ansible - Install ansible
       apt:
         name: ansible=2.9.15-1ppa~trusty
         state: present
+      become: true

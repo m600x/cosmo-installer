@@ -4,7 +4,7 @@
     update_cache: yes
     upgrade: safe
   become: true
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: CORE - Install basic packages
   apt:
@@ -29,34 +29,48 @@
     state: present
   become: true
 
-- name: CORE - Root password
-  block:
-    - name: CORE - Change root password
-      user:
-        name: root
-        password: "{{ new_root_password | password_hash('sha512') }}"
-        update_password: always
-      become: true
-      changed_when: false
-    - name: CORE - Set sudo password with new value
-      set_fact:
-        ansible_sudo_pass: "{{ new_root_password }}"
-  when: new_root_password is defined
+- name: CORE - NetworkManager - Add wifi configuration
+  template:
+    src: wifi.j2
+    dest: "/etc/NetworkManager/system-connections/{{ item }}"
+    owner: root
+    group: root
+    mode: '0600'
+  with_items: "{{ wifi_networks }}"
+  become: true
+  register: network_conf
+  
+- name: CORE - NetworkManager - Restart the service
+  systemd:
+    name: NetworkManager
+    state: restarted
+    enabled: yes
+  become: true
+  when: network_conf.changed
 
+- name: CORE - Change root password
+  user:
+    name: root
+    password: "{{ new_root_password | password_hash('sha512') }}"
+    update_password: always
+  become: true
+  changed_when: false
+  when: new_root_password is defined
+ 
 - name: CORE - New user
   block:
     - name: CORE - Add new user
       user:
         name: "{{ new_user_name }}"
         password: "{{ new_user_pass | password_hash('sha512') }}"
-        update_password: always
+        update_password: on_create
         shell: /bin/zsh
         groups: cosmo,sudo,audio,video,input,aid_system,aid_graphics,aid_input,aid_audio,aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin
         create_home: true
         home: "/home/{{ new_user_name }}"
         state: present
       become: true
-      changed_when: false
+      register: new_user
     - name: CORE - Allow passwordless sudo for new user
       lineinfile:
         path: /etc/sudoers
@@ -65,19 +79,25 @@
         line: "{{ new_user_name }} ALL=(ALL) NOPASSWD:ALL"
         validate: '/usr/sbin/visudo -cf %s'
       become: true
-    - name: CORE - NetworkManager register settings
-      find:
-        paths: /etc/NetworkManager/system-connections/
-        file_type: file
-        recurse: Yes
-      register: network_conf
-    - name: CORE - NetworkManager let new user use theses settings
-      lineinfile:
-        path: "{{ item.path }}"
-        regexp: "^permissions=user:"
-        line: "permissions=user:cosmo:{{ new_user_name }}:;"
-      with_items: "{{ network_conf.files | flatten(levels=1) }}"
+    - name: CORE - Copy default .config from cosmo to the new user
+      copy:
+        src: "/home/cosmo/.config"
+        dest: "/home/{{ new_user_name }}"
+        owner: "{{ new_user_name }}"
+        group: "{{ new_user_name }}"
+        remote_src: yes
       become: true
+      ignore_errors: true
+    - name: CORE - Force disconnect logged user in GUI
+      systemd:
+        name: display-manager
+        state: restarted
+      become: true
+      when: new_user.changed
+  when: new_user_name is defined and new_user_pass is defined
+
+- name: CORE - Purge default user
+  block:
     - name: CORE - Change active SSH user
       set_fact:
         ansible_ssh_user: "{{ new_user_name }}"
@@ -89,188 +109,6 @@
         remove: yes
         force: yes
       become: true
-  when: new_user_name is defined and new_user_pass is defined
+  when: new_user.changed
 
-- name: Check if .profile file exist
-  stat:
-    path: "/home/{{ ansible_ssh_user }}/.profile"
-  register: profile
 
-- name: Create .profile
-  file:
-    path: "/home/{{ ansible_ssh_user }}/.profile"
-    state: touch
-  when: not profile.stat.exists
-
-- name: CORE - Add .profile template to correct keyboard layout
-  lineinfile:
-    path: "/home/{{ ansible_ssh_user }}/.profile"
-    state: present
-    regexp: "^/usr/bin/setxkbmapsetxkbmap"
-    line: "/usr/bin/setxkbmap -model planetcosmo -layout {{ cosmo_keyboard_layout }}"
-  become: true
-
-- name: CORE - MicroSD
-  block:
-    - name: CORE - Create microSD mount point
-      file:
-        path: /media/sdcard
-        state: directory
-        owner: root
-        group: root
-        mode: 0777
-      become: true
-    - name: CORE - Create microSD mount point symlink in user directory
-      file:
-        src: /media/sdcard
-        dest: "/home/{{ ansible_ssh_user }}/sdcard"
-        owner: root
-        group: root
-        state: link
-      become: true
-    - name: CORE - Retrieve microSD UUID
-      shell: blkid | grep mmcblk1p1 | awk '{print $4}' | grep -Po '(?<=UUID=).*' | tr -d '"'
-      register: sd_uuid
-      changed_when: false
-      become: true
-    - name: CORE - Retrieve microSD format
-      shell: blkid | grep mmcblk1p1 | awk '{print $5}' | grep -Po '(?<=TYPE=).*' | tr -d '"'
-      register: sd_format
-      changed_when: false
-      become: true
-    - name: CORE - Mount microSD
-      mount:
-        path: /media/sdcard
-        src: "UUID={{ sd_uuid.stdout }}"
-        fstype: "{{ sd_format.stdout }}" 
-        opts: user,fmask=0111,dmask=0000
-        state: present
-      become: true
-
-- name: CORE - Touchscreen xorg mtrack (relative positioning)
-  block:
-    - name: CORE - Touchscreen xorg mtrack - Add conf file
-      copy:
-        src: "common/50-mtrack.conf"
-        dest: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
-        owner: "root"
-        group: "root"
-        mode: '0644'
-      become: true
-      when: touch_relative is true
-      notify: Restart display-manager
-    - name: CORE - Touchscreen xorg mtrack - Disable and stop cosmo-rightclick service
-      systemd:
-        name: rightclick
-        enabled: no
-        state: stopped
-      become: true
-      notify: Restart display-manager
-      ignore_errors: true
-  when: touch_relative is true
-
-- name: CORE - Touchscreen xorg evdev (absolute positioning)
-  block:
-    - name: CORE - Touchscreen xorg evdev - Get cosmo-rightclick
-      git:
-        repo: https://github.com/m600x/cosmo-rightclick.git
-        dest: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
-        clone: yes
-        update: yes
-    - name: CORE - Touchscreen xorg evdev - Build cosmo-rightclick
-      make:
-        chdir: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
-        target: all
-    - name: CORE - Touchscreen xorg evdev - Move binary to /usr/local/bin/cosmo-rightclick
-      copy:
-        src: "/home/{{ ansible_ssh_user }}/cosmo-rightclick/out/cosmo-rightclick"
-        dest: "/usr/local/bin/cosmo-rightclick"
-        owner: root
-        group: root
-        mode: '0755'
-        remote_src: yes
-      become: true
-    - name: CORE - Touchscreen xorg evdev - Add cosmo-rightclick service
-      template:
-        src: rightclick_service.j2
-        dest: "/etc/systemd/system/rightclick.service"
-        owner: root
-        group: root
-        mode: '0755'
-      become: true
-      notify: Restart display-manager
-    - name: CORE - Touchscreen xorg evdev - Enable and start cosmo-rightclick service
-      systemd:
-        name: rightclick
-        enabled: yes
-      become: true
-      notify: Restart display-manager
-    - name: CORE - Touchscreen xorg evdev - Ensure mtrack conf is absent
-      file:
-        path: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
-        state: absent
-      become: true
-      notify: Restart display-manager
-  when: touch_rightclick is true and touch_relative is false
-
-- name: CORE - Touchscreen xorg evdev default
-  block:
-    - name: CORE - Touchscreen xorg default - Disable and stop cosmo-rightclick service
-      systemd:
-        name: rightclick
-        enabled: no
-        state: stopped
-      become: true
-      notify: Restart display-manager
-      ignore_errors: true
-    - name: CORE - Touchscreen xorg default - Ensure mtrack conf is absent
-      file:
-        path: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
-        state: absent
-      become: true
-      notify: Restart display-manager
-  when: touch_rightclick is false and touch_relative is false
-
-- name: CORE - Touchscreen xorg mtrack and evdev conf template
-  template:
-    src: 10-evdev.j2
-    dest: "/usr/share/X11/xorg.conf.d/10-evdev.conf"
-    owner: root
-    group: root
-    mode: '0644'
-  become: true
-  notify: Restart display-manager
-
-- name: CORE - Keyboard
-  block:
-    - name: CORE - Keyboard - Add general hotkey binding
-      lineinfile:
-        path: "/home/{{ ansible_ssh_user }}/.config/kglobalshortcutsrc"
-        regexp: "^{{ item.split('=').0 }}"
-        line: "{{ item }}"
-        state: present
-      with_items: "{{ kde_shortcuts }}"
-      notify: Restart display-manager
-    - name: CORE - Keyboard - Add kb-backlight script control
-      copy:
-        src: common/kb-backlight.sh
-        dest: "/usr/local/bin/kb-backlight"
-        owner: root
-        group: root
-        mode: '0755'
-      become: true
-    - name: CORE - Keyboard - Add backlight hotkey binding
-      lineinfile:
-        path: "/home/{{ ansible_ssh_user }}/.config/kglobalshortcutsrc"
-        line: "{{ item }}"
-        insertafter: '^\[khotkeys\]'
-        state: present
-      with_items: "{{ kb_backlight_shortcuts }}"
-
-      notify: Restart display-manager
-    - name: CORE - Keyboard - Add backlight hotkey definition
-      blockinfile:
-        path: "/home/{{ ansible_ssh_user }}/.config/khotkeysrc"
-        insertbefore: "[Gestures]"
-        block: "{{ lookup('file', '../files/common/khotkey') }}"
-      notify: Restart display-manager

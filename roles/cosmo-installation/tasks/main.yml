@@ -1,6 +1,8 @@
 ---
 - include_tasks: core.yml
 
+- include_tasks: cosmo.yml
+
 - include_tasks: custom.yml
 
 - include_tasks: ssh.yml
