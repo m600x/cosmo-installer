@@ -1,0 +1,16 @@
+---
+system_packages:
+- curl
+- wget
+- htop
+- zsh
+- locales
+- unzip
+- git
+
+touchscreen_rightclick_packages:
+- build-essential
+- libevdev-dev
+
+touchscreen_absolute_packages:
+- xserver-xorg-input-mtrack

@@ -1,5 +1,14 @@
 #!/bin/bash
-# Doesn't use docker-compose to avoid an other dependency on the host apart from Docker itself
 
-docker build -t cosmo-installer .
-docker run -v ${PWD}/:/work:ro --rm cosmo-installer ansible-playbook -i cosmo, cosmo.yml
+CONTAINER_NAME=cosmo-installer
+
+docker build \
+    --build-arg ssh_prv_key="$(cat ~/.ssh/id_rsa)" \
+    --build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)" \
+    -t $CONTAINER_NAME .
+
+docker run -it --rm \
+    --name $CONTAINER_NAME \
+    --hostname container \
+    -v ${PWD}/:/etc/ansible:rw \
+    $CONTAINER_NAME /bin/bash

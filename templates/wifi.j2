@@ -1,0 +1,17 @@
+[connection]
+id={{ item.ssid }}
+uuid={{ item.ssid | to_uuid }}
+type=wifi
+permissions=user:{{ new_user_name | default('cosmo') }}:;
+
+[wifi]
+ssid={{ item.ssid }}
+mode=infrastructure
+
+[wifi-security]
+key-mgmt={{ item.protocole | default('wpa-psk') }}
+psk={{ item.psk }}
+
+[ipv4]
+dns-search=
+method=auto

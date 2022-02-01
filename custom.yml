@@ -1,0 +1,12 @@
+---
+- name: Cosmo | Custom
+  hosts: cosmo
+  become: true
+  diff: true
+
+  tasks:
+    - name: Cosmo | Custom - Install Oh-My-ZSH
+      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+      become_user: "{{ ansible_ssh_user }}"
+      ignore_errors: true
+      changed_when: false

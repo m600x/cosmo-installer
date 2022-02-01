@@ -1,0 +1,113 @@
+---
+- name: Cosmo | Touchscreen
+  hosts: cosmo
+  become: true
+  diff: true
+
+  handlers:
+    - include: handlers/handlers.yml
+
+  pre_tasks:
+    - name: Fail if the variable is missing
+      fail:
+        msg: "Mandatory variable is undefined"
+      when: 
+      - cosmo is undefined
+      - cosmo.touchscreen is undefined
+      - cosmo.right_click is undefined
+
+    - name: Fail if the variable has a value not allowed
+      fail:
+        msg:
+        - "Touchscreen variable as an unallowed value: {{ cosmo.touchscreen }}"
+        - "Allowed value: default, relative, absolute"
+      when:
+      - cosmo.touchscreen != 'default'
+      - cosmo.touchscreen != 'relative'
+      - cosmo.touchscreen != 'absolute'
+      - cosmo.right_click != true or cosmo.right_click != false
+
+  tasks:
+    - name: Cosmo | Touchscreen right click installation
+      block:
+        - name: Cosmo | Touchscreen right click - Add dependencies
+          apt:
+            name: "{{ touchscreen_rightclick_packages }}"
+            state: present
+
+        - name: Cosmo | Touchscreen right click - Pull repo
+          git:
+            repo: https://github.com/m600x/cosmo-rightclick.git
+            dest: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
+            clone: yes
+            update: yes
+          become_user: "{{ ansible_ssh_user }}"
+
+        - name: Cosmo | Touchscreen right click - Build binary
+          make:
+            chdir: "/home/{{ ansible_ssh_user }}/cosmo-rightclick"
+            target: all
+          become_user: "{{ ansible_ssh_user }}"
+
+        - name: Cosmo | Touchscreen right click - Move binary to /usr/local/bin/cosmo-rightclick
+          copy:
+            src: "/home/{{ ansible_ssh_user }}/cosmo-rightclick/out/cosmo-rightclick"
+            dest: "/usr/local/bin/cosmo-rightclick"
+            owner: root
+            group: root
+            mode: '0755'
+            remote_src: yes
+
+        - name: Cosmo | Touchscreen right click - Add cosmo-rightclick service
+          copy:
+            src: rightclick_service
+            dest: "/etc/systemd/system/rightclick.service"
+            owner: root
+            group: root
+            mode: '0755'
+          notify: Restart display-manager
+
+        - name: Cosmo | Touchscreen right click - Enable and start cosmo-rightclick service
+          systemd:
+            name: rightclick
+            enabled: yes
+          notify: Restart display-manager
+      when:
+      - cosmo.touchscreen != 'relative'
+      - cosmo.rightclick is true
+
+    - name: Cosmo | Touchscreen right click - Disable and stop cosmo-rightclick service
+      systemd:
+        name: rightclick
+        enabled: no
+        state: stopped
+      become: true
+      notify: Restart display-manager
+      ignore_errors: true
+      when: cosmo.rightclick is false
+
+    - name: Cosmo | Touchscreen relative installation
+      block:
+        - name: Cosmo | Touchscreen relative - Add dependencies
+          apt:
+            name: "{{ touchscreen_absolute_packages }}"
+            state: present
+
+        - name: Cosmo | Touchscreen relative - Add 50-mtrack.conf
+          copy:
+            src: "50-mtrack.conf"
+            dest: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
+            owner: "root"
+            group: "root"
+            mode: '0644'
+          notify: Restart display-manager
+      when: cosmo.touchscreen == 'relative'
+
+    - name: Cosmo | Touchscreen absolute or default - Remove 50-mtrack.conf
+      file:
+        path: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
+        state: absent
+      notify: Restart display-manager
+      when:
+      - cosmo.touchscreen == 'default'
+      - cosmo.touchscreen == 'absolute'
