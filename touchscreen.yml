@@ -1,6 +1,19 @@
 ---
+- name: Cosmo | Bootstrap connexion
+  hosts: planet_computers
+  gather_facts: false
+
+  tasks:
+    - name: Bootstrap connexion
+      import_tasks: tasks/bootstrap.yml
+      when: bootstrapped is undefined
+
+    - name: Mark cosmo as bootstrapped
+      set_fact:
+        bootstrapped: true
+
 - name: Cosmo | Touchscreen
-  hosts: cosmo
+  hosts: planet_computers
   become: true
   diff: true
 
@@ -20,9 +33,8 @@
       fail:
         msg:
         - "Touchscreen variable as an unallowed value: {{ cosmo.touchscreen }}"
-        - "Allowed value: default, relative, absolute"
+        - "Allowed value: relative, absolute"
       when:
-      - cosmo.touchscreen != 'default'
       - cosmo.touchscreen != 'relative'
       - cosmo.touchscreen != 'absolute'
       - cosmo.right_click != true or cosmo.right_click != false
@@ -103,11 +115,10 @@
           notify: Restart display-manager
       when: cosmo.touchscreen == 'relative'
 
-    - name: Cosmo | Touchscreen absolute or default - Remove 50-mtrack.conf
+    - name: Cosmo | Touchscreen absolute - Ensure 50-mtrack.conf is absent
       file:
         path: "/usr/share/X11/xorg.conf.d/50-mtrack.conf"
         state: absent
       notify: Restart display-manager
       when:
-      - cosmo.touchscreen == 'default'
       - cosmo.touchscreen == 'absolute'

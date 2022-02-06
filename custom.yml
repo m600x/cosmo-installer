@@ -1,6 +1,19 @@
 ---
+- name: Cosmo | Bootstrap connexion
+  hosts: planet_computers
+  gather_facts: false
+
+  tasks:
+    - name: Bootstrap connexion
+      import_tasks: tasks/bootstrap.yml
+      when: bootstrapped is undefined
+
+    - name: Mark cosmo as bootstrapped
+      set_fact:
+        bootstrapped: true
+
 - name: Cosmo | Custom
-  hosts: cosmo
+  hosts: planet_computers
   become: true
   diff: true
 

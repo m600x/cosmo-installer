@@ -1,0 +1,53 @@
+---
+- name: Cosmo | Bootstrap connexion
+  hosts: planet_computers
+  gather_facts: false
+
+  tasks:
+    - name: Bootstrap connexion
+      import_tasks: tasks/bootstrap.yml
+      when: bootstrapped is undefined
+
+    - name: Mark cosmo as bootstrapped
+      set_fact:
+        bootstrapped: true
+
+- name: Cosmo | MicroSD
+  hosts: planet_computers
+  become: true
+  diff: true
+
+  tasks:
+    - name: Cosmo | MicroSD Create mount point
+      file:
+        path: /media/sdcard
+        state: directory
+        owner: root
+        group: root
+        mode: 0777
+
+    - name: Cosmo | MicroSD Create mount point symlink in user directory
+      file:
+        src: /media/sdcard
+        dest: "/home/{{ ansible_ssh_user }}/sdcard"
+        owner: root
+        group: root
+        state: link
+
+    - name: Cosmo | MicroSD Retrieve UUID
+      shell: blkid | grep mmcblk1p1 | awk '{print $4}' | grep -Po '(?<=UUID=).*' | tr -d '"'
+      register: sd_uuid
+      changed_when: false
+
+    - name: Cosmo | MicroSD Retrieve format
+      shell: blkid | grep mmcblk1p1 | awk '{print $5}' | grep -Po '(?<=TYPE=).*' | tr -d '"'
+      register: sd_format
+      changed_when: false
+
+    - name: Cosmo | MicroSD Mount
+      mount:
+        path: /media/sdcard
+        src: "UUID={{ sd_uuid.stdout }}"
+        fstype: "{{ sd_format.stdout }}" 
+        opts: user,fmask=0111,dmask=0000
+        state: present

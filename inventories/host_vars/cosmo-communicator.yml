@@ -10,7 +10,7 @@ cosmo:
   keyboard: gb
   locale: en_US
   timezone: Europe/Paris
-  touchscreen: default      # Allowed value: default, relative, absolute
+  touchscreen: relative      # Allowed value: relative, absolute
   rightclick: false         # Allowed value: true, false
 
 wifi:

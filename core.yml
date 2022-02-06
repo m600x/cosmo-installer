@@ -1,6 +1,19 @@
 ---
+- name: Cosmo | Bootstrap connexion
+  hosts: planet_computers
+  gather_facts: false
+
+  tasks:
+    - name: Bootstrap connexion
+      import_tasks: tasks/bootstrap.yml
+      when: bootstrapped is undefined
+
+    - name: Mark cosmo as bootstrapped
+      set_fact:
+        bootstrapped: true
+
 - name: Cosmo | Core
-  hosts: cosmo
+  hosts: planet_computers
   become: true
   diff: true
 
@@ -53,64 +66,6 @@
         enabled: yes
       when: network_conf.changed
 
-    - name: Cosmo | Core - Change root password
-      user:
-        name: root
-        password: "{{ new_root_password | password_hash('sha512') }}"
-        update_password: always
-      changed_when: false
-      when: new_root_password is defined
-
-    - name: Cosmo | Core - Add new user
-      user:
-        name: "{{ new_user_name }}"
-        password: "{{ new_user_password | password_hash('sha512') }}"
-        update_password: always
-        shell: /bin/zsh
-        groups: cosmo,sudo,audio,video,input,aid_system,aid_graphics,aid_input,aid_audio,aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin
-        create_home: true
-        home: "/home/{{ new_user_name }}"
-        state: present
-      register: new_user
-      when: ansible_ssh_user == 'cosmo' and new_user_name is defined and new_user_password is defined
-
-    - name: Cosmo | Core - New user
-      block:
-        - name: Cosmo | Core - Allow passwordless sudo for new user
-          lineinfile:
-            path: /etc/sudoers
-            state: present
-            regexp: "^{{ new_user_name }} ALL="
-            line: "{{ new_user_name }} ALL=(ALL) NOPASSWD:ALL"
-            validate: '/usr/sbin/visudo -cf %s'
-
-        - name: Cosmo | Core - Copy default .config from cosmo to the new user
-          copy:
-            src: "/home/cosmo/.config"
-            dest: "/home/{{ new_user_name }}"
-            owner: "{{ new_user_name }}"
-            group: "{{ new_user_name }}"
-            remote_src: yes
-          ignore_errors: true
-
-        - name: Cosmo | Core - Force disconnect logged user in GUI
-          systemd:
-            name: display-manager
-            state: restarted
-
-        - name: Cosmo | Core - Change active SSH user
-          set_fact:
-            ansible_ssh_user: "{{ new_user_name }}"
-            ansible_ssh_pass: "{{ new_user_password }}"
-
-        - name: Cosmo | Core - Delete default user cosmo
-          user:
-            name: cosmo
-            state: absent
-            remove: yes
-            force: yes
-      when: new_user is defined and new_user.changed
-
     - name: Cosmo | Core - Keyboard layout
       block:
         - name: Cosmo | Core - KeyboardCheck if .profile file exist
@@ -131,39 +86,3 @@
             regexp: "^/usr/bin/setxkbmapsetxkbmap"
             line: "/usr/bin/setxkbmap -model planetcosmo -layout {{ cosmo.keyboard }}"
       when: cosmo is defined and cosmo.keyboard is defined
-
-    - name: Cosmo | Core - MicroSD
-      block:
-        - name: Cosmo | Core - MicroSD Create mount point
-          file:
-            path: /media/sdcard
-            state: directory
-            owner: root
-            group: root
-            mode: 0777
-
-        - name: Cosmo | Core - MicroSD Create mount point symlink in user directory
-          file:
-            src: /media/sdcard
-            dest: "/home/{{ ansible_ssh_user }}/sdcard"
-            owner: root
-            group: root
-            state: link
-
-        - name: Cosmo | Core - MicroSD Retrieve UUID
-          shell: blkid | grep mmcblk1p1 | awk '{print $4}' | grep -Po '(?<=UUID=).*' | tr -d '"'
-          register: sd_uuid
-          changed_when: false
-    
-        - name: Cosmo | Core - MicroSD Retrieve format
-          shell: blkid | grep mmcblk1p1 | awk '{print $5}' | grep -Po '(?<=TYPE=).*' | tr -d '"'
-          register: sd_format
-          changed_when: false
-
-        - name: Cosmo | Core - MicroSD Mount
-          mount:
-            path: /media/sdcard
-            src: "UUID={{ sd_uuid.stdout }}"
-            fstype: "{{ sd_format.stdout }}" 
-            opts: user,fmask=0111,dmask=0000
-            state: present

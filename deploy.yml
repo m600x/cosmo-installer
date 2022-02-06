@@ -1,5 +1,6 @@
 ---
-- import_playbook: bootstrap.yml
 - import_playbook: core.yml
+- import_playbook: users.yml
+- import_playbook: microsd.yml
 - import_playbook: touchscreen.yml
 - import_playbook: custom.yml
